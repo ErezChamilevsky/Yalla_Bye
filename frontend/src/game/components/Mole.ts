@@ -27,8 +27,9 @@ export class Mole extends Container {
     }
 
     public updateScale() {
+        // Restore to the original texture-based scaling that you liked
         const scale = ResponsiveManager.getMoleScale(this.normalTexture.width);
-        this.sprite.scale.set(scale);
+        this.sprite.scale.set(scale * 1.5);
     }
 
     show() {
@@ -39,16 +40,18 @@ export class Mole extends Container {
         this.alpha = 0;
         this.eventMode = 'static';
 
-        // Animate sprite locally (relative to container position)
-        this.sprite.y = 100; // Start 100px below
+        // Use 1/4 of the character height for pop-up distance
+        const distance = this.sprite.height * 0.25;
+        this.sprite.y = distance;
 
         let frames = 0;
         const animate = () => {
             if (!this.isActive || this.isHit) return;
             frames++;
             if (this.alpha < 1) this.alpha += 0.1;
-            if (this.sprite.y > 0) this.sprite.y -= 10;
+            if (this.sprite.y > 0) this.sprite.y -= (distance / 10);
             if (frames < 10) requestAnimationFrame(animate);
+            else this.sprite.y = 0;
         };
         animate();
     }
@@ -79,15 +82,17 @@ export class Mole extends Container {
         this.isActive = false;
         this.eventMode = 'none';
 
+        const distance = this.sprite.height * 0.25;
         let frames = 0;
         const animate = () => {
             frames++;
             this.alpha -= 0.1;
-            if (this.sprite.y < 100) this.sprite.y += 10;
+            if (this.sprite.y < distance) this.sprite.y += (distance / 10);
             if (frames < 10) {
                 requestAnimationFrame(animate);
             } else {
                 this.visible = false;
+                this.sprite.y = 0;
             }
         };
         animate();

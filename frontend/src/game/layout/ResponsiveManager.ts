@@ -10,13 +10,19 @@ export class ResponsiveManager {
     private static readonly BG_WIDTH = 1327;
     private static readonly BG_HEIGHT = 1536;
 
-    // Grid details from user
-    private static readonly HOLE_START_X = 235;
-    private static readonly HOLE_START_Y = 402;
-    private static readonly HOLE_WIDTH = 240;
-    private static readonly HOLE_HEIGHT = 498;
-    private static readonly HOLE_GAP_X = 65;
-    private static readonly HOLE_GAP_Y = 100;
+    // Calibrated from user screen (778x887 game area relative to 1327x1536 background)
+    private static readonly SCALE_X = 1327 / 778;
+    private static readonly SCALE_Y = 1536 / 887;
+
+    private static readonly HOLE_START_X = 175 * ResponsiveManager.SCALE_X;
+    private static readonly ROW_Y = [
+        333 * ResponsiveManager.SCALE_Y,
+        506 * ResponsiveManager.SCALE_Y,
+        677 * ResponsiveManager.SCALE_Y
+    ];
+    private static readonly HOLE_WIDTH = (234 - 175) * ResponsiveManager.SCALE_X;
+    public static readonly HOLE_HEIGHT = 260; // For pop-up animation
+    private static readonly HOLE_GAP_X = (352 - 175) * ResponsiveManager.SCALE_X - ResponsiveManager.HOLE_WIDTH;
 
     static resize(app: Application, background: Sprite) {
         this.gameWidth = window.innerWidth;
@@ -44,11 +50,11 @@ export class ResponsiveManager {
         const row = Math.floor(index / 3);
         const col = index % 3;
 
-        // X: Start + (hole + gap) * col + half_hole
-        // Applying -5px offset as requested (in local background coords)
-        const localX = this.HOLE_START_X + col * (this.HOLE_WIDTH + this.HOLE_GAP_X) + (this.HOLE_WIDTH / 2) - 5;
-        // Y: Start + (hole + gap) * row + full_hole (anchor bottom)
-        const localY = this.HOLE_START_Y + row * (this.HOLE_HEIGHT + this.HOLE_GAP_Y) + this.HOLE_HEIGHT - 5;
+        const distanceBetweenHoles = this.HOLE_WIDTH + this.HOLE_GAP_X;
+        const localX = this.HOLE_START_X + col * distanceBetweenHoles + (this.HOLE_WIDTH / 2);
+
+        // Exact Y row start for alignment
+        const localY = this.ROW_Y[row] || 1000;
 
         return new Point(
             this.bgOffset.x + localX * this.bgScale,

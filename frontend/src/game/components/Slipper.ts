@@ -19,7 +19,7 @@ export class Slipper extends Container {
     updateScale() {
         // Use RespondentManager to keep it proportional to holes
         // Slipper is texture width 546, kham is 587. Similar enough.
-        const scale = ResponsiveManager.getMoleScale(this.sprite.texture.width) * 1.2; // Slightly larger than a mole
+        const scale = ResponsiveManager.getMoleScale(this.sprite.texture.width) * 1.8;
         this.sprite.scale.set(scale);
     }
 
