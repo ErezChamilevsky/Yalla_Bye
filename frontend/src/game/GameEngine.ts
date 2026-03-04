@@ -39,6 +39,7 @@ export class GameEngine {
             const pos = ResponsiveManager.getGridPosition(i);
             mole.x = pos.x;
             mole.y = pos.y;
+            mole.updateScale();
         });
     }
 

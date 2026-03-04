@@ -52,9 +52,13 @@ async function init() {
     window.addEventListener('resize', () => {
         ResponsiveManager.resize(app, background);
         engine.updateMolePositions();
+        slipper.updateScale();
+        ui.repositionHUD();
     });
     ResponsiveManager.resize(app, background);
     engine.updateMolePositions();
+    slipper.updateScale();
+    ui.repositionHUD();
 
     // Interaction
     app.stage.eventMode = 'static';

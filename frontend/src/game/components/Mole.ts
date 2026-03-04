@@ -23,8 +23,11 @@ export class Mole extends Container {
         this.visible = false;
         this.eventMode = 'none';
 
-        // Scale mole based on background scale
-        const scale = ResponsiveManager.getScaleFactor() * 0.5; // Adjusted size
+        this.updateScale();
+    }
+
+    public updateScale() {
+        const scale = ResponsiveManager.getMoleScale(this.normalTexture.width);
         this.sprite.scale.set(scale);
     }
 
@@ -36,16 +39,15 @@ export class Mole extends Container {
         this.alpha = 0;
         this.eventMode = 'static';
 
-        // Simple fade in and pop up
-        const targetY = 0;
-        this.y += 50;
+        // Animate sprite locally (relative to container position)
+        this.sprite.y = 100; // Start 100px below
 
         let frames = 0;
         const animate = () => {
             if (!this.isActive || this.isHit) return;
             frames++;
             if (this.alpha < 1) this.alpha += 0.1;
-            if (this.y > targetY) this.y -= 5;
+            if (this.sprite.y > 0) this.sprite.y -= 10;
             if (frames < 10) requestAnimationFrame(animate);
         };
         animate();
@@ -81,7 +83,7 @@ export class Mole extends Container {
         const animate = () => {
             frames++;
             this.alpha -= 0.1;
-            this.y += 5;
+            if (this.sprite.y < 100) this.sprite.y += 10;
             if (frames < 10) {
                 requestAnimationFrame(animate);
             } else {

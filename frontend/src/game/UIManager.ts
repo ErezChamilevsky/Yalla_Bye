@@ -1,4 +1,5 @@
 import '../style.css';
+import { ResponsiveManager } from './layout/ResponsiveManager';
 
 export class UIManager {
   private overlay: HTMLElement;
@@ -26,13 +27,49 @@ export class UIManager {
   }
 
   updateHUD(score: number, time: number) {
-    let hud = document.getElementById('hud');
-    if (!hud) {
-      hud = document.createElement('div');
-      hud.id = 'hud';
-      document.body.appendChild(hud);
+    let scoreHud = document.getElementById('score-hud');
+    if (!scoreHud) {
+      scoreHud = document.createElement('div');
+      scoreHud.id = 'score-hud';
+      scoreHud.className = 'hud-element';
+      document.body.appendChild(scoreHud);
     }
-    hud.innerHTML = `Score: ${score} | Time: ${time}s`;
+    scoreHud.innerHTML = `${score}`;
+
+    let timeHud = document.getElementById('time-hud');
+    if (!timeHud) {
+      timeHud = document.createElement('div');
+      timeHud.id = 'time-hud';
+      timeHud.className = 'hud-element';
+      document.body.appendChild(timeHud);
+    }
+    timeHud.innerHTML = `${time}s`;
+
+    this.repositionHUD();
+  }
+
+  repositionHUD() {
+    const scoreHud = document.getElementById('score-hud');
+    if (scoreHud) {
+      const pos = ResponsiveManager.getUIPosition(668.5, 117); // Center of (385, 53 -> 952, 181)
+      const size = ResponsiveManager.getUISize(567, 128);
+      scoreHud.style.left = `${pos.x}px`;
+      scoreHud.style.top = `${pos.y}px`;
+      scoreHud.style.width = `${size.width}px`;
+      scoreHud.style.height = `${size.height}px`;
+      scoreHud.style.fontSize = `${size.height * 0.6}px`;
+    }
+
+    const timeHud = document.getElementById('time-hud');
+    if (timeHud) {
+      const pos = ResponsiveManager.getUIPosition(668.5, 276); // Center of (351, 241 -> 986, 311)
+      const size = ResponsiveManager.getUISize(635, 70);
+      timeHud.style.left = `${pos.x}px`;
+      timeHud.style.top = `${pos.y}px`;
+      timeHud.style.width = `${size.width}px`;
+      timeHud.style.height = `${size.height}px`;
+      timeHud.style.fontSize = `${size.height * 0.8}px`;
+    }
   }
 
   showGameOver(score: number, leaders: any[], cityLeaders: any[]) {

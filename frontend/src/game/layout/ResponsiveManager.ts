@@ -4,14 +4,19 @@ export class ResponsiveManager {
     private static gameWidth: number;
     private static gameHeight: number;
     private static bgScale: number;
+    private static bgOffset: Point = new Point(0, 0);
 
-    // Relative positions for a 3x3 grid
-    // Adjusted to be slightly lower and staggered based on typical backgrounds
-    private static gridMap = [
-        { x: 0.25, y: 0.45 }, { x: 0.5, y: 0.45 }, { x: 0.75, y: 0.45 },
-        { x: 0.2, y: 0.65 }, { x: 0.5, y: 0.65 }, { x: 0.8, y: 0.65 },
-        { x: 0.25, y: 0.85 }, { x: 0.5, y: 0.85 }, { x: 0.75, y: 0.85 }
-    ];
+    // Background dimensions (from asset check)
+    private static readonly BG_WIDTH = 1327;
+    private static readonly BG_HEIGHT = 1536;
+
+    // Grid details from user
+    private static readonly HOLE_START_X = 235;
+    private static readonly HOLE_START_Y = 402;
+    private static readonly HOLE_WIDTH = 240;
+    private static readonly HOLE_HEIGHT = 498;
+    private static readonly HOLE_GAP_X = 65;
+    private static readonly HOLE_GAP_Y = 100;
 
     static resize(app: Application, background: Sprite) {
         this.gameWidth = window.innerWidth;
@@ -20,20 +25,60 @@ export class ResponsiveManager {
         app.renderer.resize(this.gameWidth, this.gameHeight);
 
         if (background) {
-            this.bgScale = Math.max(this.gameWidth / background.texture.width, this.gameHeight / background.texture.height);
+            // "Contain" scaling - show full image
+            this.bgScale = Math.min(this.gameWidth / this.BG_WIDTH, this.gameHeight / this.BG_HEIGHT);
             background.scale.set(this.bgScale);
+
+            // Center the background
             background.x = this.gameWidth / 2;
             background.y = this.gameHeight / 2;
             background.anchor.set(0.5);
+
+            // Calculate offset of background top-left corner on screen
+            this.bgOffset.x = (this.gameWidth - this.BG_WIDTH * this.bgScale) / 2;
+            this.bgOffset.y = (this.gameHeight - this.BG_HEIGHT * this.bgScale) / 2;
         }
     }
 
     static getGridPosition(index: number): Point {
-        const pos = this.gridMap[index] || { x: 0.5, y: 0.5 };
-        return new Point(this.gameWidth * pos.x, this.gameHeight * pos.y);
+        const row = Math.floor(index / 3);
+        const col = index % 3;
+
+        // X: Start + (hole + gap) * col + half_hole
+        // Applying -5px offset as requested (in local background coords)
+        const localX = this.HOLE_START_X + col * (this.HOLE_WIDTH + this.HOLE_GAP_X) + (this.HOLE_WIDTH / 2) - 5;
+        // Y: Start + (hole + gap) * row + full_hole (anchor bottom)
+        const localY = this.HOLE_START_Y + row * (this.HOLE_HEIGHT + this.HOLE_GAP_Y) + this.HOLE_HEIGHT - 5;
+
+        return new Point(
+            this.bgOffset.x + localX * this.bgScale,
+            this.bgOffset.y + localY * this.bgScale
+        );
+    }
+
+    static getMoleScale(originalWidth: number): number {
+        // Scale mole to fit hole width
+        const targetWidth = this.HOLE_WIDTH;
+        const scaleInHole = targetWidth / originalWidth;
+        return (this.bgScale || 1) * scaleInHole;
     }
 
     static getScaleFactor(): number {
         return this.bgScale || 1;
+    }
+
+    // Helper to get UI positions (like score/time areas)
+    static getUIPosition(localX: number, localY: number): Point {
+        return new Point(
+            this.bgOffset.x + localX * this.bgScale,
+            this.bgOffset.y + localY * this.bgScale
+        );
+    }
+
+    static getUISize(localWidth: number, localHeight: number) {
+        return {
+            width: localWidth * this.bgScale,
+            height: localHeight * this.bgScale
+        };
     }
 }
