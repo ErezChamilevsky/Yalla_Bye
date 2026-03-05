@@ -8,6 +8,13 @@ export class UIManager {
     this.overlay = document.createElement('div');
     this.overlay.id = 'ui-overlay';
     document.body.appendChild(this.overlay);
+
+    const linkedin = document.createElement('a');
+    linkedin.href = 'https://www.linkedin.com/in/erez-chamilevsky/';
+    linkedin.target = '_blank';
+    linkedin.className = 'linkedin-link-footer';
+    linkedin.innerHTML = `<img src="/assets/linkedin.png" alt="LinkedIn">`;
+    document.body.appendChild(linkedin);
   }
 
   showStartScreen(onStart: () => void) {

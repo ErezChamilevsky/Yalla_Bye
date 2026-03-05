@@ -61,6 +61,34 @@ canvas {
     width: 90%;
     max-width: 400px;
     pointer-events: auto;
+    position: relative;
+    overflow: hidden;
+}
+
+.linkedin-link-footer {
+    position: fixed;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0.5;
+    transition: all 0.3s ease;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.linkedin-link-footer:hover {
+    opacity: 0.9;
+    transform: translateX(-50%) scale(1.15);
+}
+
+.linkedin-link-footer img {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
 @keyframes cardFadeIn {
