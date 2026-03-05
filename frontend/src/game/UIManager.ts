@@ -87,7 +87,7 @@ export class UIManager {
       <div class="card">
         <h1>Game Over</h1>
         <img src="/assets/${randomImg}.png" class="result-img" alt="Result Character">
-        <p style="font-size: 1.5rem; margin-bottom: 2rem;">Slaps: ${score}</p>
+        <p class="score-text">Slaps: ${score}</p>
         <div class="btn-container">
           <button id="play-again-btn">Play Again</button>
           <button class="whatsapp-btn" onclick="window.open('${whatsappUrl}', '_blank')">
