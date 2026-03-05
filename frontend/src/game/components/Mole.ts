@@ -2,6 +2,8 @@ import { Container, Sprite, Texture } from 'pixi.js';
 import { AssetManager } from '../AssetManager';
 import { ResponsiveManager } from '../layout/ResponsiveManager';
 
+import { SoundManager } from '../../services/SoundManager';
+
 export type MoleType = 'kham' | 'sin' | 'nas';
 
 export class Mole extends Container {
@@ -27,15 +29,17 @@ export class Mole extends Container {
     }
 
     public updateScale() {
-        // Restore to the original texture-based scaling that you liked
         const scale = ResponsiveManager.getMoleScale(this.normalTexture.width);
-        this.sprite.scale.set(scale * 1.5);
+        // Base size is 1.5x, whacked size is 2x on top of that (1.5 * 2.0 = 3.0)
+        const multiplier = this.isHit ? 3.0 : 1.5;
+        this.sprite.scale.set(scale * multiplier);
     }
 
     show() {
         this.isHit = false;
         this.isActive = true;
         this.sprite.texture = this.normalTexture;
+        this.updateScale(); // Reset scale to normal
         this.visible = true;
         this.alpha = 0;
         this.eventMode = 'static';
@@ -60,6 +64,10 @@ export class Mole extends Container {
         if (this.isHit) return;
         this.isHit = true;
         this.sprite.texture = this.damagedTexture;
+        this.updateScale(); // Enlarge immediately upon hit
+
+        SoundManager.playWhack();
+        SoundManager.playRandomOuch();
 
         // Shake effect
         const originalX = this.sprite.x;
