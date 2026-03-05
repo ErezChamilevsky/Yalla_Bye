@@ -15,17 +15,22 @@ async function init() {
     const ui = new UIManager();
     const app = new Application();
 
+    // Start loading assets in parallel with PIXI initialization
+    const assetsLoading = AssetManager.load();
+
     try {
         await app.init({
             background: '#1099bb',
             resizeTo: window,
+            resolution: window.devicePixelRatio || 1,
+            autoDensity: true,
+            antialias: true,
+            hello: true // Useful for debugging PIXI version in console
         });
         document.body.appendChild(app.canvas);
-        console.log('PIXI initialized');
 
-        console.log('Loading assets...');
-        await AssetManager.load();
-        console.log('Assets loaded successfully');
+        await assetsLoading; // Wait for assets if not already done
+        console.log('PIXI initialized and assets loaded');
 
         const bgTexture = AssetManager.getTexture('background');
         if (!bgTexture) throw new Error('Background texture failed to load');
@@ -43,15 +48,18 @@ async function init() {
         engine.setCallbacks(
             (score, time) => ui.updateHUD(score, time),
             (score) => {
-                ui.showGameOver(score, [], []); // Pass empty leaders for now
+                ui.showGameOver(score, () => {
+                    engine.start();
+                });
             }
         );
 
-        ui.showStartScreen((name, city) => {
-            console.log(`Starting game for ${name} from ${city}`);
+        // Show start screen initially
+        ui.showStartScreen(() => {
             engine.start();
             ui.hideOverlay();
         });
+
 
         // Resize listener
         window.addEventListener('resize', () => {

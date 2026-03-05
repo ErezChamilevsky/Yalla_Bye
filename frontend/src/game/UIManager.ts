@@ -87,7 +87,9 @@ export class UIManager {
     this.overlay.classList.add('active');
     const damImages = ['kham-dam', 'nas-dam', 'sin-dam'];
     const randomImg = damImages[Math.floor(Math.random() * damImages.length)];
-    const shareText = `I scored ${score} slapps in Yalla Bye! Can you pass me? https://yalla-bye.vercel.app/`;
+    const productionUrl = 'https://yallabye.vercel.app';
+    const shareLink = `${productionUrl}/share/${randomImg}/${score}`;
+    const shareText = `I scored ${score} slaps in Yalla Bye! Can you pass me?\nPlay now: ${shareLink}`;
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
 
     this.overlay.innerHTML = `
@@ -97,8 +99,8 @@ export class UIManager {
         <p class="score-text">Slaps: ${score}</p>
         <div class="btn-container">
           <button id="play-again-btn">Play Again</button>
-          <button class="whatsapp-btn" onclick="window.open('${whatsappUrl}', '_blank')">
-            Share on WhatsApp
+          <button id="share-btn" class="whatsapp-btn">
+            Share
           </button>
         </div>
       </div>
@@ -107,6 +109,10 @@ export class UIManager {
     document.getElementById('play-again-btn')?.addEventListener('click', () => {
       this.hideOverlay();
       onPlayAgain();
+    });
+
+    document.getElementById('share-btn')?.addEventListener('click', () => {
+      window.open(whatsappUrl, '_blank');
     });
   }
 }

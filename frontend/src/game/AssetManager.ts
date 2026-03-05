@@ -15,8 +15,12 @@ export class AssetManager {
             { alias: 'slipper', src: '/assets/slipper.png' },
         ];
 
-        for (const asset of assets) {
-            this.textures[asset.alias] = await Assets.load(asset.src);
+        // Load all assets in parallel
+        const loadedAssets = await Assets.load(assets.map(a => ({ alias: a.alias, src: a.src })));
+
+        // Populate the textures record
+        for (const alias in loadedAssets) {
+            this.textures[alias] = loadedAssets[alias];
         }
     }
 

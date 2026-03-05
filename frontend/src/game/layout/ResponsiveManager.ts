@@ -31,8 +31,17 @@ export class ResponsiveManager {
         app.renderer.resize(this.gameWidth, this.gameHeight);
 
         if (background) {
-            // "Contain" scaling - show full image
-            this.bgScale = Math.min(this.gameWidth / this.BG_WIDTH, this.gameHeight / this.BG_HEIGHT);
+            // Determine if we should use "Cover" (mobile) or "Contain" (desktop)
+            const isMobile = window.innerWidth < 1024 || window.innerHeight > window.innerWidth;
+
+            if (isMobile) {
+                // "Cover" scaling for mobile - fill the entire screen
+                this.bgScale = Math.max(this.gameWidth / this.BG_WIDTH, this.gameHeight / this.BG_HEIGHT);
+            } else {
+                // "Contain" scaling for desktop - show full image without cropping
+                this.bgScale = Math.min(this.gameWidth / this.BG_WIDTH, this.gameHeight / this.BG_HEIGHT);
+            }
+
             background.scale.set(this.bgScale);
 
             // Center the background

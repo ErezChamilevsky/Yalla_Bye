@@ -1,0 +1,15 @@
+{
+    "version": 2,
+    "public": true,
+    "rewrites": [
+        {
+            "source": "/share/:img/:score",
+            "destination": "/api/share?img=:img&score=:score"
+        },
+        {
+            "source": "/(.*)",
+            "destination": "/$1"
+        }
+    ],
+    "framework": "vite"
+}
