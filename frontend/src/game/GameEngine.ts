@@ -1,6 +1,7 @@
 import { Application, Container, Point } from 'pixi.js';
 import { Mole, MoleType } from './components/Mole';
 import { ResponsiveManager } from './layout/ResponsiveManager';
+import { SoundManager } from '../services/SoundManager';
 
 export class GameEngine {
     private moles: Mole[] = [];
@@ -49,6 +50,9 @@ export class GameEngine {
         this.activeMoleIndex = -1;
         this.moles.forEach(m => m.hide());
 
+        this.onUpdate?.(this.score, this.timeLeft);
+        SoundManager.playBackgroundMusic();
+
         this.timerInterval = window.setInterval(() => {
             this.timeLeft--;
             this.onUpdate?.(this.score, this.timeLeft);
@@ -90,6 +94,7 @@ export class GameEngine {
         if (this.timerInterval) clearInterval(this.timerInterval);
         if (this.spawnTimeout) clearTimeout(this.spawnTimeout);
         this.moles.forEach(m => m.hide());
+        SoundManager.stopBackgroundMusic();
         this.onGameOver?.(this.score);
     }
 

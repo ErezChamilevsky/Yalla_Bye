@@ -10,19 +10,16 @@ export class UIManager {
     document.body.appendChild(this.overlay);
   }
 
-  showStartScreen(onStart: (name: string, city: string) => void) {
+  showStartScreen(onStart: () => void) {
+    this.overlay.classList.add('active');
     this.overlay.innerHTML = `
       <div class="card">
-        <h1>Whac-A-Mole</h1>
-        <input id="name" type="text" placeholder="Name" />
-        <input id="city" type="text" placeholder="City" />
+        <h1>Yalla Bye</h1>
         <button id="start-btn">Start Game</button>
       </div>
     `;
     document.getElementById('start-btn')?.addEventListener('click', () => {
-      const name = (document.getElementById('name') as HTMLInputElement).value;
-      const city = (document.getElementById('city') as HTMLInputElement).value;
-      if (name && city) onStart(name, city);
+      onStart();
     });
   }
 
@@ -51,50 +48,59 @@ export class UIManager {
   repositionHUD() {
     const scoreHud = document.getElementById('score-hud');
     if (scoreHud) {
-      const pos = ResponsiveManager.getUIPosition(668.5, 117); // Center of (385, 53 -> 952, 181)
+      const pos = ResponsiveManager.getUIPosition(387, 48);
       const size = ResponsiveManager.getUISize(567, 128);
       scoreHud.style.left = `${pos.x}px`;
       scoreHud.style.top = `${pos.y}px`;
       scoreHud.style.width = `${size.width}px`;
       scoreHud.style.height = `${size.height}px`;
+      // Removed translateX(-50%) to match the old working version
       scoreHud.style.fontSize = `${size.height * 0.6}px`;
     }
 
     const timeHud = document.getElementById('time-hud');
     if (timeHud) {
-      const pos = ResponsiveManager.getUIPosition(668.5, 276); // Center of (351, 241 -> 986, 311)
+      const pos = ResponsiveManager.getUIPosition(355, 240);
       const size = ResponsiveManager.getUISize(635, 70);
       timeHud.style.left = `${pos.x}px`;
       timeHud.style.top = `${pos.y}px`;
       timeHud.style.width = `${size.width}px`;
       timeHud.style.height = `${size.height}px`;
+      // Removed translateX(-50%) to match the old working version
       timeHud.style.fontSize = `${size.height * 0.8}px`;
     }
   }
 
-  showGameOver(score: number, leaders: any[], cityLeaders: any[]) {
+  hideOverlay() {
+    this.overlay.classList.remove('active');
+    this.overlay.innerHTML = '';
+  }
+
+  showGameOver(score: number, onPlayAgain: () => void) {
+    this.overlay.classList.add('active');
+    const damImages = ['kham-dam', 'nas-dam', 'sin-dam'];
+    const randomImg = damImages[Math.floor(Math.random() * damImages.length)];
+    const shareText = `I scored ${score} slapps in Yalla Bye! Can you pass me? https://yalla-bye.vercel.app/`;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+
     this.overlay.innerHTML = `
       <div class="card">
         <h1>Game Over</h1>
-        <p style="font-size: 1.5rem; margin-bottom: 2rem;">Your Score: ${score}</p>
-        
-        <div style="display: flex; gap: 2rem; justify-content: center; text-align: left; margin-bottom: 2rem;">
-          <div>
-            <h3>Top Players</h3>
-            <ul style="list-style: none; padding: 0;">
-                ${leaders.slice(0, 5).map(l => `<li>${l.name}: <strong>${l.bestScore}</strong></li>`).join('')}
-            </ul>
-          </div>
-          <div>
-            <h3>Top Cities</h3>
-            <ul style="list-style: none; padding: 0;">
-                ${cityLeaders.slice(0, 5).map(c => `<li>${c._id}: <strong>${Math.round(c.avgScore)}</strong></li>`).join('')}
-            </ul>
-          </div>
+        <img src="/assets/${randomImg}.png" class="result-img" alt="Result Character">
+        <p style="font-size: 1.5rem; margin-bottom: 2rem;">Slaps: ${score}</p>
+        <div class="btn-container">
+          <button id="play-again-btn">Play Again</button>
+          <button class="whatsapp-btn" onclick="window.open('${whatsappUrl}', '_blank')">
+            Share on WhatsApp
+          </button>
         </div>
-        
-        <button onclick="window.location.reload()">Play Again</button>
       </div>
     `;
+
+    document.getElementById('play-again-btn')?.addEventListener('click', () => {
+      this.hideOverlay();
+      onPlayAgain();
+    });
   }
 }
+

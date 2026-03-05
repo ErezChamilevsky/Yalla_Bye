@@ -4,72 +4,89 @@ import { GameEngine } from './game/GameEngine';
 import { ResponsiveManager } from './game/layout/ResponsiveManager';
 import { Slipper } from './game/components/Slipper';
 import { UIManager } from './game/UIManager';
-import { APIService } from './services/APIService';
 
 async function init() {
+    console.log('Initializing game...');
+
+    // Cleanup existing elements if any (for HMR)
+    document.querySelectorAll('canvas').forEach(c => c.remove());
+    document.getElementById('ui-overlay')?.remove();
+
     const ui = new UIManager();
     const app = new Application();
-    await app.init({
-        background: '#1099bb',
-        resizeTo: window,
-    });
-    document.body.appendChild(app.canvas);
 
-    await AssetManager.load();
+    try {
+        await app.init({
+            background: '#1099bb',
+            resizeTo: window,
+        });
+        document.body.appendChild(app.canvas);
+        console.log('PIXI initialized');
 
-    const background = new Sprite(AssetManager.getTexture('background'));
-    app.stage.addChild(background);
+        console.log('Loading assets...');
+        await AssetManager.load();
+        console.log('Assets loaded successfully');
 
-    const gameContainer = new Container();
-    app.stage.addChild(gameContainer);
+        const bgTexture = AssetManager.getTexture('background');
+        if (!bgTexture) throw new Error('Background texture failed to load');
 
-    const engine = new GameEngine(app, gameContainer);
-    const slipper = new Slipper();
-    app.stage.addChild(slipper);
+        const background = new Sprite(bgTexture);
+        app.stage.addChild(background);
 
-    let currentUser = { name: '', city: '' };
+        const gameContainer = new Container();
+        app.stage.addChild(gameContainer);
 
-    engine.setCallbacks(
-        (score, time) => ui.updateHUD(score, time),
-        async (score) => {
-            await APIService.submitScore(currentUser.name, currentUser.city, score);
-            const [leaders, cityLeaders] = await Promise.all([
-                APIService.getIndividualLeaderboard(),
-                APIService.getCityLeaderboard()
-            ]);
-            ui.showGameOver(score, leaders, cityLeaders);
-        }
-    );
+        const engine = new GameEngine(app, gameContainer);
+        const slipper = new Slipper();
+        app.stage.addChild(slipper);
 
-    ui.showStartScreen((name, city) => {
-        currentUser = { name, city };
-        engine.start();
-        const overlay = document.getElementById('ui-overlay');
-        if (overlay) overlay.innerHTML = '';
-    });
+        engine.setCallbacks(
+            (score, time) => ui.updateHUD(score, time),
+            (score) => {
+                ui.showGameOver(score, [], []); // Pass empty leaders for now
+            }
+        );
 
-    // Resize listener
-    window.addEventListener('resize', () => {
+        ui.showStartScreen((name, city) => {
+            console.log(`Starting game for ${name} from ${city}`);
+            engine.start();
+            ui.hideOverlay();
+        });
+
+        // Resize listener
+        window.addEventListener('resize', () => {
+            ResponsiveManager.resize(app, background);
+            engine.updateMolePositions();
+            slipper.updateScale();
+            ui.repositionHUD();
+        });
         ResponsiveManager.resize(app, background);
         engine.updateMolePositions();
         slipper.updateScale();
         ui.repositionHUD();
-    });
-    ResponsiveManager.resize(app, background);
-    engine.updateMolePositions();
-    slipper.updateScale();
-    ui.repositionHUD();
 
-    // Interaction
-    app.stage.eventMode = 'static';
-    app.stage.on('pointermove', (e) => {
-        slipper.updatePosition(e.global);
-    });
+        // Interaction
+        app.stage.eventMode = 'static';
+        app.stage.on('pointermove', (e) => {
+            slipper.updatePosition(e.global);
+        });
 
-    app.stage.on('pointerdown', (e) => {
-        slipper.whack();
-        engine.handleWhack(e.global);
-    });
+        app.stage.on('pointerdown', (e) => {
+            slipper.whack();
+            engine.handleWhack(e.global);
+        });
+
+        console.log('Game initialized and ready');
+    } catch (error) {
+        console.error('Failed to initialize game:', error);
+        // Show an error on screen if possible
+        const errorDiv = document.createElement('div');
+        errorDiv.style.color = 'white';
+        errorDiv.style.padding = '20px';
+        errorDiv.style.background = 'red';
+        errorDiv.innerHTML = `Error: ${error instanceof Error ? error.message : String(error)}`;
+        document.body.appendChild(errorDiv);
+    }
 }
 
 init();
