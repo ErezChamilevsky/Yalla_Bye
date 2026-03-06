@@ -12,9 +12,11 @@ export class Mole extends Container {
     private damagedTexture: Texture;
     public isHit: boolean = false;
     public isActive: boolean = false;
+    public type: MoleType;
 
     constructor(type: MoleType) {
         super();
+        this.type = type;
         this.normalTexture = AssetManager.getTexture(type);
         this.damagedTexture = AssetManager.getTexture(`${type}-dam`);
 
@@ -67,7 +69,7 @@ export class Mole extends Container {
         this.updateScale(); // Enlarge immediately upon hit
 
         SoundManager.playWhack();
-        SoundManager.playRandomOuch();
+        SoundManager.playCharacterOuch(this.type);
 
         // Shake effect
         const originalX = this.sprite.x;

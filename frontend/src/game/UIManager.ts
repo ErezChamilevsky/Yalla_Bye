@@ -1,5 +1,6 @@
 import '../style.css';
 import { ResponsiveManager } from './layout/ResponsiveManager';
+import { SoundManager } from '../services/SoundManager';
 
 export class UIManager {
   private overlay: HTMLElement;
@@ -15,6 +16,15 @@ export class UIManager {
     linkedin.className = 'linkedin-link-footer';
     linkedin.innerHTML = `<img src="/assets/linkedin.png" alt="LinkedIn">`;
     document.body.appendChild(linkedin);
+
+    const muteBtn = document.createElement('button');
+    muteBtn.id = 'mute-btn';
+    muteBtn.innerHTML = SoundManager.isMuted ? '🔇' : '🔊';
+    muteBtn.addEventListener('click', () => {
+      const isMuted = SoundManager.toggleMute();
+      muteBtn.innerHTML = isMuted ? '🔇' : '🔊';
+    });
+    document.body.appendChild(muteBtn);
   }
 
   showStartScreen(onStart: () => void) {
@@ -75,6 +85,18 @@ export class UIManager {
       timeHud.style.height = `${size.height}px`;
       // Removed translateX(-50%) to match the old working version
       timeHud.style.fontSize = `${size.height * 0.8}px`;
+    }
+
+    const muteBtn = document.getElementById('mute-btn');
+    if (muteBtn) {
+      const isMobile = window.innerWidth < 1024 || window.innerHeight > window.innerWidth;
+      if (isMobile) {
+        muteBtn.style.left = '20px';
+      } else {
+        // Position relative to the background left edge on desktop
+        const bgPos = ResponsiveManager.getUIPosition(50, 0); // Position at background local X=50
+        muteBtn.style.left = `${bgPos.x}px`;
+      }
     }
   }
 
