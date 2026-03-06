@@ -1,38 +1,56 @@
-import { Sprite, Container, Point } from 'pixi.js';
-import { AssetManager } from '../AssetManager';
+import { Point } from 'pixi.js';
 import { ResponsiveManager } from '../layout/ResponsiveManager';
 
-export class Slipper extends Container {
-    private sprite: Sprite;
+export class Slipper {
+    private element: HTMLImageElement;
+    private rotation: number = 0;
 
     constructor() {
-        super();
-        this.sprite = new Sprite(AssetManager.getTexture('slipper'));
-        this.sprite.anchor.set(0.5);
-        this.addChild(this.sprite);
+        this.element = document.createElement('img');
+        this.element.src = '/assets/slipper.png';
+        this.element.id = 'game-slipper';
+        this.element.style.position = 'fixed';
+        this.element.style.pointerEvents = 'none';
+        this.element.style.zIndex = '10'; // Above HUD (5) but below Footer (1000)
+        this.element.style.transition = 'transform 0.1s ease-out';
+        this.element.style.transformOrigin = 'center';
+        this.element.style.display = 'none'; // Hide until first move
+        document.body.appendChild(this.element);
 
-        // Make it follow the pointer
-        this.eventMode = 'none';
         this.updateScale();
     }
 
     updateScale() {
-        // Use RespondentManager to keep it proportional to holes
-        // Slipper is texture width 546, kham is 587. Similar enough.
-        const scale = ResponsiveManager.getMoleScale(this.sprite.texture.width) * 1.8;
-        this.sprite.scale.set(scale);
+        // Slipper texture width is 546
+        const scale = ResponsiveManager.getMoleScale(546) * 1.8;
+        // The scale from ResponsiveManager is relative to the canvas. 
+        // We need to apply it to the image size.
+        const width = 546 * scale;
+        this.element.style.width = `${width}px`;
+        this.element.style.height = 'auto';
     }
 
     updatePosition(pos: Point) {
-        this.x = pos.x;
-        this.y = pos.y;
+        this.element.style.display = 'block';
+        this.element.style.left = `${pos.x}px`;
+        this.element.style.top = `${pos.y}px`;
+        this.updateTransform();
+    }
+
+    private updateTransform() {
+        this.element.style.transform = `translate(-50%, -50%) rotate(${this.rotation}rad)`;
     }
 
     whack() {
-        // Rotation/Translation animation for whacking
-        this.sprite.rotation = -0.5;
+        this.rotation = -0.5;
+        this.updateTransform();
         setTimeout(() => {
-            this.sprite.rotation = 0;
+            this.rotation = 0;
+            this.updateTransform();
         }, 100);
+    }
+
+    destroy() {
+        this.element.remove();
     }
 }

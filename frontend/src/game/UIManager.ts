@@ -10,12 +10,16 @@ export class UIManager {
     this.overlay.id = 'ui-overlay';
     document.body.appendChild(this.overlay);
 
+    const footer = document.createElement('div');
+    footer.id = 'footer-container';
+    document.body.appendChild(footer);
+
     const linkedin = document.createElement('a');
     linkedin.href = 'https://www.linkedin.com/in/erez-chamilevsky/';
     linkedin.target = '_blank';
     linkedin.className = 'linkedin-link-footer';
     linkedin.innerHTML = `<img src="/assets/linkedin.png" alt="LinkedIn">`;
-    document.body.appendChild(linkedin);
+    footer.appendChild(linkedin);
 
     const muteBtn = document.createElement('button');
     muteBtn.id = 'mute-btn';
@@ -24,7 +28,7 @@ export class UIManager {
       const isMuted = SoundManager.toggleMute();
       muteBtn.innerHTML = isMuted ? '🔇' : '🔊';
     });
-    document.body.appendChild(muteBtn);
+    footer.appendChild(muteBtn);
   }
 
   showStartScreen(onStart: () => void) {
@@ -71,7 +75,6 @@ export class UIManager {
       scoreHud.style.top = `${pos.y}px`;
       scoreHud.style.width = `${size.width}px`;
       scoreHud.style.height = `${size.height}px`;
-      // Removed translateX(-50%) to match the old working version
       scoreHud.style.fontSize = `${size.height * 0.6}px`;
     }
 
@@ -83,19 +86,30 @@ export class UIManager {
       timeHud.style.top = `${pos.y}px`;
       timeHud.style.width = `${size.width}px`;
       timeHud.style.height = `${size.height}px`;
-      // Removed translateX(-50%) to match the old working version
       timeHud.style.fontSize = `${size.height * 0.8}px`;
     }
 
-    const muteBtn = document.getElementById('mute-btn');
-    if (muteBtn) {
+    const footer = document.getElementById('footer-container');
+    if (footer) {
       const isMobile = window.innerWidth < 1024 || window.innerHeight > window.innerWidth;
+
       if (isMobile) {
-        muteBtn.style.left = '20px';
+        footer.style.left = '0';
+        footer.style.bottom = '2.1rem'; // Shifted lower from 2.5rem (~6-8 pixels lower)
+        footer.style.width = '100%';
+        footer.style.top = 'auto';
       } else {
-        // Position relative to the background left edge on desktop
-        const bgPos = ResponsiveManager.getUIPosition(50, 0); // Position at background local X=50
-        muteBtn.style.left = `${bgPos.x}px`;
+        const footerWidth = 1327; // Background width
+        const footerLocalY = 1437; // Shifted higher by 30 pixels (was 1495)
+
+        const pos = ResponsiveManager.getUIPosition(0, footerLocalY);
+        const size = ResponsiveManager.getUISize(footerWidth, 60);
+
+        footer.style.left = `${pos.x}px`;
+        footer.style.top = `${pos.y}px`;
+        footer.style.width = `${size.width}px`;
+        footer.style.bottom = 'auto';
+        footer.style.transform = 'translateY(-50%)'; // Center on the line
       }
     }
   }

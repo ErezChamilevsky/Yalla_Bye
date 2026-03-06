@@ -37,7 +37,7 @@ export class Mole extends Container {
         this.sprite.scale.set(scale * multiplier);
     }
 
-    show() {
+    show(durationInFrames: number = 10) {
         this.isHit = false;
         this.isActive = true;
         this.sprite.texture = this.normalTexture;
@@ -54,10 +54,13 @@ export class Mole extends Container {
         const animate = () => {
             if (!this.isActive || this.isHit) return;
             frames++;
-            if (this.alpha < 1) this.alpha += 0.1;
-            if (this.sprite.y > 0) this.sprite.y -= (distance / 10);
-            if (frames < 10) requestAnimationFrame(animate);
-            else this.sprite.y = 0;
+            if (this.alpha < 1) this.alpha += (1 / durationInFrames);
+            if (this.sprite.y > 0) this.sprite.y -= (distance / durationInFrames);
+            if (frames < durationInFrames) requestAnimationFrame(animate);
+            else {
+                this.alpha = 1;
+                this.sprite.y = 0;
+            }
         };
         animate();
     }
@@ -81,13 +84,13 @@ export class Mole extends Container {
                 requestAnimationFrame(shake);
             } else {
                 this.sprite.x = originalX;
-                setTimeout(() => this.hide(), 300);
+                setTimeout(() => this.hide(5), 300); // Faster hide after being hit
             }
         };
         shake();
     }
 
-    hide() {
+    hide(durationInFrames: number = 10) {
         if (!this.isActive) return;
         this.isActive = false;
         this.eventMode = 'none';
@@ -96,12 +99,13 @@ export class Mole extends Container {
         let frames = 0;
         const animate = () => {
             frames++;
-            this.alpha -= 0.1;
-            if (this.sprite.y < distance) this.sprite.y += (distance / 10);
-            if (frames < 10) {
+            this.alpha -= (1 / durationInFrames);
+            if (this.sprite.y < distance) this.sprite.y += (distance / durationInFrames);
+            if (frames < durationInFrames) {
                 requestAnimationFrame(animate);
             } else {
                 this.visible = false;
+                this.alpha = 0;
                 this.sprite.y = 0;
             }
         };

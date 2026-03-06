@@ -1,4 +1,4 @@
-import { Application, Sprite, Container } from 'pixi.js';
+import { Application, Sprite, Container, Point } from 'pixi.js';
 import { AssetManager } from './game/AssetManager';
 import { GameEngine } from './game/GameEngine';
 import { ResponsiveManager } from './game/layout/ResponsiveManager';
@@ -43,7 +43,6 @@ async function init() {
 
         const engine = new GameEngine(app, gameContainer);
         const slipper = new Slipper();
-        app.stage.addChild(slipper);
 
         engine.setCallbacks(
             (score, time) => ui.updateHUD(score, time),
@@ -74,14 +73,16 @@ async function init() {
         ui.repositionHUD();
 
         // Interaction
-        app.stage.eventMode = 'static';
-        app.stage.on('pointermove', (e) => {
-            slipper.updatePosition(e.global);
+        window.addEventListener('pointermove', (e) => {
+            slipper.updatePosition(new Point(e.clientX, e.clientY));
         });
 
-        app.stage.on('pointerdown', (e) => {
+        window.addEventListener('pointerdown', (e) => {
             slipper.whack();
-            engine.handleWhack(e.global);
+            // Handle mole whacking ONLY if we clicked on the stage (not on some UI)
+            if (e.target === app.canvas) {
+                engine.handleWhack(new Point(e.clientX, e.clientY));
+            }
         });
 
         console.log('Game initialized and ready');

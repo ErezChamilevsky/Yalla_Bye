@@ -62,6 +62,37 @@ export class GameEngine {
         this.spawnLoop();
     }
 
+    private getHideDelay(): number {
+        const slaps = Math.floor(this.score / 10);
+
+        if (slaps <= 5) return 2000;       // 0-5 Slaps: Easy
+        if (slaps <= 9) return 1500;       // 6-9 Slaps: Harder
+        if (slaps <= 13) return 1200;      // 10-13 Slaps: Challenging
+        if (slaps <= 17) return 1000;      // 14-17 Slaps: even harder
+
+        // 18+ Slaps: Continues to speed up every 3 slaps
+        const extraGroups = Math.floor((slaps - 18) / 3);
+        const reduction = extraGroups * 50;
+        return Math.max(425, 1000 - reduction); // Min 425ms
+    }
+
+    private getAnimationDuration(): number {
+        const slaps = Math.floor(this.score / 10);
+        if (slaps <= 5) return 10;
+        if (slaps <= 9) return 8;
+        if (slaps <= 13) return 7;
+        if (slaps <= 17) return 6;
+        return 5;
+    }
+
+    private getSpawnDelay(): number {
+        const slaps = Math.floor(this.score / 10);
+        if (slaps <= 5) return 300;
+        if (slaps <= 9) return 250;
+        if (slaps <= 13) return 200;
+        return 150;
+    }
+
     private spawnLoop() {
         if (this.timeLeft <= 0) return;
 
@@ -76,12 +107,13 @@ export class GameEngine {
             mole.x = pos.x;
             mole.y = pos.y;
 
-            mole.show();
+            const animSpeed = this.getAnimationDuration();
+            mole.show(animSpeed);
 
-            // Auto-hide after some time
-            const hideDelay = Math.max(800, 2000 - (60 - this.timeLeft) * 20); // Gets faster
+            // Auto-hide after some time (based on difficulty)
+            const hideDelay = this.getHideDelay();
             this.spawnTimeout = window.setTimeout(() => {
-                mole.hide();
+                mole.hide(animSpeed);
                 this.spawnLoop();
             }, hideDelay);
         } else {
@@ -93,7 +125,7 @@ export class GameEngine {
     stop() {
         if (this.timerInterval) clearInterval(this.timerInterval);
         if (this.spawnTimeout) clearTimeout(this.spawnTimeout);
-        this.moles.forEach(m => m.hide());
+        this.moles.forEach(m => m.hide(5));
         SoundManager.stopBackgroundMusic();
         this.onGameOver?.(this.score);
     }
@@ -108,7 +140,8 @@ export class GameEngine {
 
                 // Clear the auto-hide timeout and spawn next immediately
                 if (this.spawnTimeout) clearTimeout(this.spawnTimeout);
-                this.spawnTimeout = window.setTimeout(() => this.spawnLoop(), 300);
+                const spawnDelay = this.getSpawnDelay();
+                this.spawnTimeout = window.setTimeout(() => this.spawnLoop(), spawnDelay);
 
                 return true;
             }
