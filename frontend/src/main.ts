@@ -73,11 +73,17 @@ async function init() {
         ui.repositionHUD();
 
         // Interaction
-        window.addEventListener('pointermove', (e) => {
+        const updateSlipperPosition = (e: PointerEvent) => {
             slipper.updatePosition(new Point(e.clientX, e.clientY));
-        });
+        };
 
-        window.addEventListener('pointerdown', (e) => {
+        window.addEventListener('pointermove', updateSlipperPosition);
+
+        window.addEventListener('pointerdown', (e: PointerEvent) => {
+            // Update position immediately on tap/down to prevent the slipper 
+            // from whacking at its previous location (common on iOS)
+            updateSlipperPosition(e);
+
             slipper.whack();
             // Handle mole whacking ONLY if we clicked on the stage (not on some UI)
             if (e.target === app.canvas) {

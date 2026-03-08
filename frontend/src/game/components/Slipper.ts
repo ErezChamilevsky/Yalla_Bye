@@ -38,7 +38,8 @@ export class Slipper {
     }
 
     private updateTransform() {
-        this.element.style.transform = `translate(-50%, -50%) rotate(${this.rotation}rad)`;
+        // Using translate3d(0,0,0) or translate3d for better performance on mobile (iOS)
+        this.element.style.transform = `translate3d(-50%, -50%, 0) rotate(${this.rotation}rad)`;
     }
 
     whack() {
