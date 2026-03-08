@@ -1,5 +1,8 @@
 # Yalla Bye! 👟💥
+<p align="center">
 
+<img width="200" height="300" alt="image" src="https://github.com/user-attachments/assets/5e1320e1-4bc3-4368-8236-b36b5ea88281" />
+</p>
 A fast-paced, addictive "Whack-a-Mole" style game built with modern web technologies. "Yalla Bye" (Arabic for "Okay, Bye" or "Let's Go, Bye") captures the frantic energy of slapping away distractions with a trusty slipper.
 
 ## 🚀 The Story
@@ -27,6 +30,9 @@ This project was **"Vibe Coded"** into existence in **less than 24 hours**. It's
 ### Prerequisites
 - Node.js (Latest LTS recommended)
 - npm
+
+### Demo
+[link](https://yallabye.vercel.app/)
 
 ### Setup
 1. Clone the repository
